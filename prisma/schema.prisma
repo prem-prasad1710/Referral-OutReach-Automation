@@ -1,0 +1,97 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model SmtpSettings {
+  id            String   @id @default(cuid())
+  provider      String
+  email         String
+  encryptedPass String
+  fromName      String   @default("Prem Prasad")
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Resume {
+  id        String     @id @default(cuid())
+  fileName  String
+  filePath  String
+  fileSize  Int
+  version   Int        @default(1)
+  isActive  Boolean    @default(true)
+  createdAt DateTime   @default(now())
+  campaigns Campaign[]
+}
+
+model Contact {
+  id          String              @id @default(cuid())
+  name        String
+  email       String              @unique
+  company     String
+  designation String
+  linkedinUrl String?
+  isValid     Boolean             @default(true)
+  createdAt   DateTime            @default(now())
+  recipients  CampaignRecipient[]
+}
+
+model CampaignTemplate {
+  id              String   @id @default(cuid())
+  name            String
+  subjectTemplate String
+  bodyTemplate    String
+  createdAt       DateTime @default(now())
+}
+
+model Campaign {
+  id              String              @id @default(cuid())
+  name            String
+  subjectTemplate String
+  bodyTemplate    String
+  resumeId        String
+  resume          Resume              @relation(fields: [resumeId], references: [id])
+  status          String              @default("draft")
+  delaySeconds    Int                 @default(60)
+  batchSize       Int                 @default(1)
+  maxRetries      Int                 @default(3)
+  scheduledAt     DateTime?
+  startedAt       DateTime?
+  completedAt     DateTime?
+  createdAt       DateTime            @default(now())
+  recipients      CampaignRecipient[]
+  logs            EmailLog[]
+}
+
+model CampaignRecipient {
+  id                String    @id @default(cuid())
+  campaignId        String
+  campaign          Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  contactId         String
+  contact           Contact   @relation(fields: [contactId], references: [id])
+  personalizedIntro String?
+  editedSubject     String?
+  editedBody        String?
+  status            String    @default("pending")
+  retryCount        Int       @default(0)
+  lastError         String?
+  sentAt            DateTime?
+
+  @@unique([campaignId, contactId])
+}
+
+model EmailLog {
+  id             String   @id @default(cuid())
+  campaignId     String
+  campaign       Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  recipientEmail String
+  recipientName  String
+  status         String
+  errorMessage   String?
+  sentAt         DateTime @default(now())
+}
