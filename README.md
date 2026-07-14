@@ -123,6 +123,22 @@ The resume PDF is attached to every outgoing email automatically.
 | `npm run db:studio` | Open Prisma Studio |
 | `npm run worker` | Background campaign worker |
 
+## Deploying to Vercel
+
+**Do not use SQLite on Vercel.** Serverless functions have an ephemeral filesystem, so `file:./dev.db` will not persist and tables will not exist at runtime.
+
+1. Create a hosted Postgres database (e.g. [Neon](https://neon.tech), [Vercel Postgres](https://vercel.com/docs/storage/vercel-postgres), or Supabase).
+2. In the Vercel project **Settings → Environment Variables**, set:
+   - `DATABASE_URL` — Postgres connection string
+   - `ENCRYPTION_KEY` — same value as local (`openssl rand -hex 32`)
+   - `GROQ_API_KEY`, `GROQ_MODEL`, and any SMTP vars you need
+3. Update `prisma/schema.prisma` datasource provider from `sqlite` to `postgresql` before deploying (Postgres and SQLite cannot share the same Prisma provider setting).
+4. Redeploy. The `vercel-build` script runs `prisma db push` to create tables before `next build`.
+
+Dashboard routes are rendered dynamically at request time so the build does not query the database during static generation.
+
+**Note:** Resume PDFs are stored on the local filesystem (`uploads/resumes/`). That path is not durable on Vercel serverless. For production, use object storage (S3, Vercel Blob, etc.) or deploy to a platform with persistent disk.
+
 ## Project Structure
 
 ```

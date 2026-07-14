@@ -1,5 +1,8 @@
 import { AppSidebar } from "@/components/layout/app-sidebar";
 
+// Dashboard pages read from the database at request time — skip static prerender at build.
+export const dynamic = "force-dynamic";
+
 export default function DashboardLayout({
   children,
 }: Readonly<{
