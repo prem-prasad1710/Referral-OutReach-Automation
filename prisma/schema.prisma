@@ -73,7 +73,7 @@ model CampaignRecipient {
   campaignId        String
   campaign          Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   contactId         String
-  contact           Contact   @relation(fields: [contactId], references: [id])
+  contact           Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
   personalizedIntro String?
   editedSubject     String?
   editedBody        String?

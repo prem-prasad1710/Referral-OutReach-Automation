@@ -1,8 +1,5 @@
-import OpenAI from "openai";
 import { getFirstName } from "@/lib/email/templates";
-
-const GROQ_BASE_URL = "https://api.groq.com/openai/v1";
-const DEFAULT_GROQ_MODEL = "llama-3.3-70b-versatile";
+import { getGroqClient, getGroqModel } from "@/lib/ai/groq";
 
 const FALLBACK_VARIANTS = [
   "Your experience as {{designation}} at {{company}} caught my attention.",
@@ -10,20 +7,6 @@ const FALLBACK_VARIANTS = [
   "Your background at {{company}} as {{designation}} stood out to me.",
   "I noticed your work as {{designation}} at {{company}} and wanted to connect.",
 ];
-
-let client: OpenAI | null = null;
-
-function getClient(): OpenAI | null {
-  const apiKey = process.env.GROQ_API_KEY;
-  if (!apiKey) return null;
-  if (!client) {
-    client = new OpenAI({
-      apiKey,
-      baseURL: GROQ_BASE_URL,
-    });
-  }
-  return client;
-}
 
 export interface PersonalizedIntroInput {
   name: string;
@@ -45,7 +28,7 @@ export async function generatePersonalizedIntro(
   input: PersonalizedIntroInput,
 ): Promise<string> {
   const firstName = getFirstName(input.name);
-  const groq = getClient();
+  const groq = getGroqClient();
 
   if (!groq) {
     return buildFallbackIntro(input);
@@ -61,7 +44,7 @@ export async function generatePersonalizedIntro(
 
   try {
     const response = await groq.chat.completions.create({
-      model: process.env.GROQ_MODEL ?? DEFAULT_GROQ_MODEL,
+      model: getGroqModel(),
       temperature: 0.85,
       max_tokens: 80,
       messages: [

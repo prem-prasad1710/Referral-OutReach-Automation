@@ -5,7 +5,8 @@ A full-stack Next.js application for sending personalized job referral emails wi
 ## Features
 
 - **Resume upload** — PDF versioning with active resume selection
-- **Contact import** — CSV and Excel (Name, Email, Company, Designation, LinkedIn URL)
+- **Auto-discover contacts** — Enter company name; finds LinkedIn HR, recruiters & employees + emails automatically
+- **Contact import** — CSV/Excel fallback, or smart-paste from LinkedIn
 - **Email templates** — `{{name}}`, `{{company}}`, `{{designation}}`, `{{ai_intro}}` placeholders
 - **AI personalization** — Groq (Llama) generates unique intro paragraphs per contact
 - **Preview & edit** — Review and customize emails before sending
@@ -42,6 +43,8 @@ DATABASE_URL="file:./dev.db"
 ENCRYPTION_KEY="<run: openssl rand -hex 32>"
 GROQ_API_KEY="gsk-your-groq-api-key"
 GROQ_MODEL="llama-3.3-70b-versatile"
+SERPER_API_KEY="your-serper-key"   # free at https://serper.dev — required for auto-discover
+HUNTER_API_KEY=""                  # optional — better email finding at https://hunter.io
 ```
 
 Optional SMTP fallback (UI settings take precedence):
@@ -89,7 +92,7 @@ npm run worker
 ## Usage Flow
 
 1. **Settings** — Configure Gmail or Outlook SMTP (test connection)
-2. **Upload Contacts** — Import CSV/Excel with Name, Email, Company, Designation
+2. **Contacts** — Enter company name → **Discover & import** (auto-finds LinkedIn HR & employees)
 3. **Upload Resume** — Upload your PDF resume
 4. **Create Campaign** — Select contacts, edit templates, set delay (30–120s)
 5. **Preview** — Review AI-personalized emails; edit per recipient
